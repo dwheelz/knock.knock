@@ -1,14 +1,14 @@
 
 import os
+import secrets
+from pathlib import Path
+from re import search, match
 from base64 import urlsafe_b64encode as b64e
 from base64 import urlsafe_b64decode as b64d
 from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
-from pathlib import Path
-from re import search, match
-import secrets
 
 DEFAULT_SAVE_DIR = os.path.join(Path(__file__).parents[3], "config")
 
@@ -17,6 +17,9 @@ class PasswordSucksError(Exception):
     """Raised when a password really sucks"""
     pass
 
+class IncorrectPasswordError(Exception):
+    """Raised when the password is not correct"""
+    pass
 
 class StanzaBase:
     """Stanza base class"""
@@ -49,14 +52,14 @@ class WriteStanza(StanzaBase):
 
     use_hmac = "Y"
 
-    def __init__(self, spoof_user, allow_ip, access, spa_server, key_base64, hmac_base64):
+    def __init__(self, spoof_user, access, spa_server, key_base64, hmac_base64, allow_ip="resolve"):
         """init baby"""
         super().__init__(access)
         self.spoof_user = spoof_user
-        self.allow_ip = allow_ip
         self.spa_server = spa_server
         self.key_base64 = key_base64
         self.hmac_key_base64 = hmac_base64
+        self.allow_ip = allow_ip
 
     def _formater(self) -> str:
         """Format the stanza, lets make it look pretty"""
@@ -150,8 +153,7 @@ class ReadStanza(StanzaBase):
         try:
             return Fernet(key).decrypt(token).decode(self._encoding)
         except InvalidToken:
-            print("-------------- Invalid password for .fwknoprc file! --------------")
-            return None
+            raise IncorrectPasswordError("Invalid password for .fwknoprc file!")
 
     def read_encrypted_file(self, password: str, _dir : str = DEFAULT_SAVE_DIR, file_name : str = None) -> str | None:
         """Reads the encrypted stanza. Requires the stanza name via: file_name param or self.access.
