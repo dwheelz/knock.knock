@@ -1,11 +1,14 @@
 """Generates fwknoprc file(s)"""
 
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
+from re import search
 from urllib.request import urlopen
 from common.fwknoprc import WriteStanza
 from common.docker_secret_reader import read_secret, SecretNotFound
 
-class Args(ArgumentParser):
+DEFAULT_SECRET_FILE_NAME = "knock.password"
+
+class StanzaArgs(ArgumentParser):
     """Arg parser"""
 
     _description = (
@@ -21,7 +24,7 @@ class Args(ArgumentParser):
         self.add_argument("--key", dest="key_base64", type=str, help="Your base64 encoded key")
         self.add_argument("--hmac", dest="hmac_key_base64", type=str, help="Your base64 encoded HMAC key")
         self.add_argument("--your_ip", dest="allow_ip", type=str, required=False, default=None, help="Your external IP. This is not required")
-        self.add_argument("--password", type=str, help="The passphrase to encyrpt the fwknoprc file(s).")
+        self.add_argument("--password", type=str, required=False, default="", help="The passphrase to encyrpt the fwknoprc file(s).")
 
 
 def get_external_ip() -> str:
@@ -34,10 +37,8 @@ def get_external_ip() -> str:
     print(f"External IP Address: {ext_ip}")
     return ext_ip
 
-
-def main():
-    """Its main baby"""
-    args = Args().parse_args()
+def save_stanzas(args: Namespace):
+    """Creates the stanza files"""
     for port in args.access:
         stanza_kwargs = {
             "spoof_user": args.spoof_user,
@@ -48,15 +49,25 @@ def main():
         }
         stanza_kwargs["allow_ip"] = args.allow_ip if args.allow_ip else get_external_ip()
         stanza = WriteStanza(**stanza_kwargs)
-        if args.password.startswith("secret_"):
+        pw_file = None
+        if not args.password:
+            pw_file = DEFAULT_SECRET_FILE_NAME
+        elif args.password.startswith("secret:"):
+            pw_file = search(r"secret:(?P<pass_file>[\w\W]+?)")
+
+        if pw_file is not None:
             try:
-                password = read_secret(args.password)
+                password = read_secret(pw_file)
             except Exception as exc:
-                raise SecretNotFound("The secret cannot be found. Did you create it before running this?") from exc
+                raise SecretNotFound("Password secret cannot be found. Did you create it before running this?") from exc
         else:
             password = args.password
 
         stanza.save(password=password)
+
+def main():
+    """Its main baby"""
+    save_stanzas(StanzaArgs().parse_args())
 
 if __name__ == "__main__":
     main()
