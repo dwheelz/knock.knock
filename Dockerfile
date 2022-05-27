@@ -13,4 +13,5 @@ RUN rm requirements.txt
 # Make the config and application DIRs
 RUN mkdir config
 RUN mkdir app
+RUN mkdir output
 WORKDIR /app

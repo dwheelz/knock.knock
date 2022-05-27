@@ -6,8 +6,9 @@ services:
     container_name: knockknock-config
     volumes:
       - "./config:/config"
+      - "./output:/output"
       - "./run-scripts:/app"
-    command: python /app/py/gen_stanza.py  # TODO: CHANGE TO CORRECT ENTRY FILE
+    command: python /app/py/gen_stanza_from_config_str.py ${SECRET} > /output/knock_config.log 2>&1
     secrets:
       - secret_pw
 
