@@ -8,5 +8,5 @@ class SecretNotFound(Exception):
 
 def read_secret(file_name: str) -> str:
     """Reads the docker secret from /run/secrets/file_name"""
-    with open(Path("/run/secrets",file_name), "r", encoding="utf-8") as secret:
+    with open(Path("/run/secrets", file_name), "r", encoding="utf-8") as secret:
         return secret.read().strip("\n")
