@@ -9,10 +9,3 @@ services:
       - "./data:/data"
       - "./run-scripts:/app"
     command: python /app/py/gen_stanza_from_config_str.py > /data/knock_config.log 2>&1
-    secrets:
-      - secret_pw
-
-secrets:
-  secret_pw:
-    external: true
-    name: kpassword

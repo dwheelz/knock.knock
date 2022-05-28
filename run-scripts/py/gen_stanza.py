@@ -1,12 +1,8 @@
 """Generates fwknoprc file(s)"""
 
 from argparse import ArgumentParser, Namespace
-from re import search
 from urllib.request import urlopen
 from common.fwknoprc import WriteStanza
-from common.docker_secret_reader import read_secret, SecretNotFound
-
-DEFAULT_SECRET_FILE_NAME = "knock.password"
 
 class StanzaArgs(ArgumentParser):
     """Arg parser"""
@@ -24,7 +20,6 @@ class StanzaArgs(ArgumentParser):
         self.add_argument("--key", dest="key_base64", type=str, help="Your base64 encoded key")
         self.add_argument("--hmac", dest="hmac_key_base64", type=str, help="Your base64 encoded HMAC key")
         self.add_argument("--your_ip", dest="allow_ip", type=str, required=False, default=None, help="Your external IP. This is not required")
-        self.add_argument("--password", type=str, required=False, default="", help="The passphrase to encyrpt the fwknoprc file(s).")
 
 
 def get_external_ip() -> str:
@@ -49,21 +44,7 @@ def save_stanzas(args: Namespace):
         }
         stanza_kwargs["allow_ip"] = args.allow_ip if args.allow_ip else get_external_ip()
         stanza = WriteStanza(**stanza_kwargs)
-        pw_file = None
-        if not args.password:
-            pw_file = DEFAULT_SECRET_FILE_NAME
-        elif args.password.startswith("secret:"):
-            pw_file = search(r"secret:(?P<pass_file>[\w\W]+?)")
-
-        if pw_file is not None:
-            try:
-                password = read_secret(pw_file)
-            except Exception as exc:
-                raise SecretNotFound("Password secret cannot be found. Did you create it before running this?") from exc
-        else:
-            password = args.password
-
-        stanza.save(password=password)
+        stanza.save()
 
 def main():
     """Its main baby"""
