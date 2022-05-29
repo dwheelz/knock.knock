@@ -20,9 +20,9 @@ class StanzaBase(SharedSecureString):
         """Returns the full filename"""
         if file_name is None:
             rgx = r"[a-z]+\/+(?P<port>[\d]+)"
-            file_name = f"{search(rgx, self.access).group('port')}"
+            file_name = f"{search(rgx, self.access).group('port')}.fwknoprc"
 
-        return f"{file_name}.fwknoprc"
+        return file_name
 
 class WriteStanza(StanzaBase):
     """WriteStanza"""
@@ -93,15 +93,12 @@ class ReadStanza(StanzaBase):
         """init baby"""
         super().__init__(access)
 
-    def read_encrypted_file(self, _dir : str = DEFAULT_SAVE_DIR, file_name : str = None) -> str | None:
-        """Reads the encrypted stanza. Requires the stanza name via: file_name param or self.access.
+    def read_encrypted_file(self, full_path : str) -> str:
+        """Reads the encrypted stanza.
 
-        : param _dir: The dir to save the stanza to
-        : param file_name: The filename
+        : param full_path: The full path to the file
         """
-        assert any([file_name, self.access]), "either file_name or allow_ip must contain a value"
-        file_name = self._fname(file_name)
-        with open(Path(_dir, file_name), "rb") as file:
+        with open(Path(full_path), "rb") as file:
             data = file.read().strip()
 
         return self.decrypt(data, "client_pub.pem")

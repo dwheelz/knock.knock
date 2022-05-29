@@ -1,0 +1,11 @@
+version: "3.9"
+
+services:
+  knock-knock-runner:
+    build: .
+    container_name: knock-knock-runner
+    volumes:
+      - "./config:/config"
+      - "./data:/data"
+      - "./run-scripts:/app"
+    command: python /app/py/knock_knock.py
