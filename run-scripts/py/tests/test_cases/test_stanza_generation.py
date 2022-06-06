@@ -3,7 +3,7 @@
 from unittest import TestCase
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(__file__, "../../")))
+sys.path.append(os.path.abspath(os.path.join(__file__, "../../../")))
 
 from cryptography.hazmat.primitives.serialization import load_pem_private_key, load_pem_public_key
 

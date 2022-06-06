@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from unittest import TestLoader, TextTestRunner
 
-TESTCASE_DIR = os.path.abspath(Path(__file__).parent)
+TESTCASE_DIR = os.path.join(os.path.abspath(Path(__file__).parent), "test_cases")
 
 def discover_and_run(start_dir: str = TESTCASE_DIR, pattern: str = "test_*.py"):
     """Discovers and runs all unit tests from the specified DIR
