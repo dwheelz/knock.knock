@@ -24,10 +24,11 @@ AUTHORITY_PUB_KEY = _read_key("server_pub.pem")
 
 class SharedSecureString:
     """Shared key between authoritive issuer and client"""
-    def __init__(self) -> None:
-        self._client_priv_key = load_pem_private_key(CLIENT_PRIV_KEY, password=None)
-        self._client_public_key = load_pem_public_key(CLIENT_PUB_KEY)
-        self._auth_pub_key = load_pem_public_key(AUTHORITY_PUB_KEY)
+    def __init__(self, _client_priv: bytes = CLIENT_PRIV_KEY, _client_pub: bytes = CLIENT_PUB_KEY,
+        _auth_pub: bytes = AUTHORITY_PUB_KEY) -> None:
+        self._client_priv_key = load_pem_private_key(_client_priv, password=None)
+        self._client_public_key = load_pem_public_key(_client_pub)
+        self._auth_pub_key = load_pem_public_key(_auth_pub)
 
     @staticmethod
     def _derive_key(shared_key: bytes) -> bytes:
