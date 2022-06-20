@@ -101,11 +101,3 @@ class TestWriteStanza(TestCase):
             hmac_base64=self.hmac_key_base64
         )
         self.assertEqual(stanza._formater(), TEST_FORMATED_STANZA_DATA_RESOLVE)
-
-    def test_write_secure(self):
-        """Test _write method (secure)"""
-        pass
-
-    def test_write_unsecure(self):
-        """Test _write method (unsecure)"""
-        pass
