@@ -1,11 +1,14 @@
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
+$CurrentDIR = ($pwd).path
+$DecryptionKeyData = Get-Content "$CurrentDIR/utils/stanzakey.key"
+
 Function Get-File($button)
 {
     $OpenFileDialog = New-Object System.Windows.Forms.OpenFileDialog
     $OpenFileDialog.Title = "Please select file"
-    $OpenFileDialog.InitialDirectory = Join-Path ($pwd).path "stanzas"
+    $OpenFileDialog.InitialDirectory = Join-Path $CurrentDIR "stanzas"
     $OpenFileDialog.filter = "Knock files (.fwknoprc) | *.fwknoprc"
     # Out-Null supresses the "OK" after selecting the file.
     $OpenFileDialog.ShowDialog() | Out-Null
@@ -15,9 +18,16 @@ Function Get-File($button)
 
 Function KnockKnock($button)
 {
+    # Get encrypted Stanza content, decrypt it
     $StanzaObj = Get-File $button
     $WinStanzaPath = $StanzaObj.FileName
-    $LinuxPath = (($WinStanzaPath -replace '\\','/') -replace ':','').ToLower().Trim('/')
+    $SecureStanzaData = Get-Content $WinStanzaPath | ConvertTo-SecureString -Key $DecryptionKeyData
+    $DecryptedStanzaData = [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($SecureStanzaData))
+    # Save decrypted stanza to temp file, must be ASCII
+    $TempStanzaFile = "$CurrentDIR/tmp_stanza.tmp"
+    $DecryptedStanzaData | Out-File -FilePath $TempStanzaFile -Encoding "ascii"
+    # Create path that WSL instance can understand
+    $LinuxPath = (($TempStanzaFile -replace '\\','/') -replace ':','').ToLower().Trim('/')
     $WSLStanzaPath = "/mnt/$LinuxPath"
     $pinfo = New-Object System.Diagnostics.ProcessStartInfo
     $pinfo.FileName = "wsl.exe"
@@ -43,6 +53,7 @@ Function KnockKnock($button)
         $StanzaSafeName = $StanzaObj.SafeFileName
         Write-Host "Successful knock with stanza: $StanzaSafeName"
     }
+    Remove-Item -Path $TempStanzaFile
 }
 
 $form = New-Object System.Windows.Forms.Form
