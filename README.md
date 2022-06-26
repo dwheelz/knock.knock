@@ -34,6 +34,12 @@ To launch the application, right click on 'launcher.ps1" and select 'Run with Po
 When launching for the first time, a prompt will load asking if you want to allow the file to be run. Press Y, followed by enter.
 You can now select your available stanzas via the folder diaglog box.
 
+If you need to generate encrypted stanzas, you'll want to do the below:
+
+- Generate an encryption key with: utils/keygen.ps1
+- Encyrpt your stanzas with utils/encryptor.ps1
+
+I decided auto deleting the unencrypted stanzas was probably a dangerous idea, please clean the unencrypted stanzas manually when you are done.
 
 # Python/Docker implementation (Needs work)
 
