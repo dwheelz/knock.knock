@@ -9,6 +9,34 @@ This allows for a relatively simple and secure way to do the following:
 
 For more information on the Single Packet Authorization/Fwknop implementation, please review: https://www.cipherdyne.org/fwknop/docs/fwknop-tutorial.html#quick-start
 
+# Powershell implementation 
+Nested inside /run-scripts/powershell is a simple gui application and some basic utilities.
+Due to the state of the fwknop-client on Windows, WSL is required. The gui application simply pipes the encrypted stanzas on your filesystem into a WSL instance (ubuntu) running fwknop-client. 
+
+## WSL setup:
+- Make sure virtualisation is enabled in your bios (Intel VT/VT-X or AMD SVM) 
+- To install WSL (assuming it already isn't) run the following from an admin powershell window, restart once its complete. 
+
+```wsl --install```
+
+Once you have rebooted, a new ubuntu WSL window should load asking you to setup a username and password. Put what you like here.
+If it doesn't load up, simply run ```wsl --distribution ubuntu``` from an non-admin Powershell window.
+ 
+Now run the following inside the Ubuntu window (it will ask you for your password):
+```
+sudo apt update -y
+sudo apt upgrade -y
+sudo apt install fwknop-client -y
+```
+
+If you are simply using this application to knock on someones SPA server, and they have given you some pre-configured .fwknoprc files, all setup is done.
+To launch the application, right click on 'launcher.ps1" and select 'Run with Powershell'.
+When launching for the first time, a prompt will load asking if you want to allow the file to be run. Press Y, followed by enter.
+You can now select your available stanzas via the folder diaglog box.
+
+
+# Python/Docker implementation (Needs work)
+
 Before use, the client certificates (client_priv and client_pub) should be updated with some new Elipict Curve certs. Please refer to supported types for the installed
 version of OpenSSL (via the Cryptography package).
 The same also applies to the bundled 'server_pub' certificate.
